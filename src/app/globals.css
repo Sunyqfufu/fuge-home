@@ -12,3 +12,4 @@ button,input,textarea,select { font:inherit; } button { cursor:pointer; border:0
 .notice p { color:#58718a; }
 .notice button { color:var(--blue-deep); border-color:#aac9df; }
 .item-icon { background:#e7f2fa; }
+.sync-error { background:#fff2ed; border:1px solid #e8b4a6; border-radius:10px; color:#8d362c; font-size:12px; line-height:1.5; padding:10px 12px; margin-bottom:14px; }
