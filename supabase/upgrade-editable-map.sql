@@ -1,31 +1,6 @@
--- 福哥的家：多人共享物品库（V1）
--- 在 Supabase Dashboard → SQL Editor → New query 中完整粘贴并点击 Run。
+-- 福哥的家：仅升级“可编辑收纳地图”
+-- 如果 items 表已经建好，请执行本文件，而不是完整 schema.sql。
 
-create table if not exists public.items (
-  id uuid primary key default gen_random_uuid(),
-  household_code text not null default 'fuge-home',
-  name text not null,
-  category text not null default '其他',
-  location text not null,
-  quantity text not null default '1 件',
-  expiry text,
-  status text not null default '未开封',
-  icon text not null default '📦',
-  note text,
-  created_at timestamptz not null default now()
-);
-
-alter table public.items enable row level security;
-
--- 允许脚本安全地重复执行，不会影响已有物品数据。
-drop policy if exists "家庭成员可查看共享物品" on public.items;
-drop policy if exists "家庭成员可新增共享物品" on public.items;
-drop policy if exists "家庭成员可删除共享物品" on public.items;
-create policy "家庭成员可查看共享物品" on public.items for select to anon using (household_code = 'fuge-home');
-create policy "家庭成员可新增共享物品" on public.items for insert to anon with check (household_code = 'fuge-home');
-create policy "家庭成员可删除共享物品" on public.items for delete to anon using (household_code = 'fuge-home');
-
--- 收纳地图：空间与收纳地点。首次执行时会写入一套可继续修改的基础地图。
 create table if not exists public.locations (
   id uuid primary key default gen_random_uuid(),
   household_code text not null default 'fuge-home',
@@ -34,9 +9,7 @@ create table if not exists public.locations (
   level text not null default 'space' check (level in ('space', 'place')),
   created_at timestamptz not null default now()
 );
-
 alter table public.locations enable row level security;
-
 drop policy if exists "家庭成员可查看共享地图" on public.locations;
 drop policy if exists "家庭成员可新增共享地图" on public.locations;
 drop policy if exists "家庭成员可修改共享地图" on public.locations;
@@ -45,7 +18,6 @@ create policy "家庭成员可查看共享地图" on public.locations for select
 create policy "家庭成员可新增共享地图" on public.locations for insert to anon with check (household_code = 'fuge-home');
 create policy "家庭成员可修改共享地图" on public.locations for update to anon using (household_code = 'fuge-home') with check (household_code = 'fuge-home');
 create policy "家庭成员可删除共享地图" on public.locations for delete to anon using (household_code = 'fuge-home');
-
 insert into public.locations (household_code, name, parent_name, level)
 select 'fuge-home', seed.name, seed.parent_name, seed.level
 from (values
